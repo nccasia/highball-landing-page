@@ -1,0 +1,692 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  /* background: var(--background);
+  color: var(--foreground); */
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #000;
+  overflow-x: hidden;
+}
+
+
+.intro-logo,
+.mobile-menu .nav-link,
+.work-item,
+.works-row,
+#bg-video,
+#pixel-canvas,
+#overlay {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.intro-logo.show,
+.mobile-menu.show .nav-link,
+.works-row.is-visible .work-item {
+  will-change: auto;
+}
+
+/* Performance: Optimize animations */
+.work-item video {
+  will-change: auto;
+}
+
+.works-row.is-visible .work-item video {
+  will-change: opacity, transform;
+}
+
+/* ========================================
+   LOGO & INTRO
+======================================== */
+.intro {
+  z-index: 1;
+  position: absolute;
+  top: 15vh;
+  left: 10vh;
+  pointer-events: none;
+}
+
+.intro-logo {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 1.2s ease-out, transform 1.2s ease-out;
+  pointer-events: none;
+}
+
+.intro-logo.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ========================================
+   TYPING TEXT
+======================================== */
+.typing-text {
+  margin-top: 47px;
+  font-family: "Neue Haas Grotesk Display Pro", sans-serif;
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: 2.1%;
+  color: #ffffff;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  pointer-events: none;
+}
+
+#typing-text {
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+#typing-text span {
+  opacity: 0;
+  display: inline;
+}
+
+#typing-text.typing-active span {
+  animation: fadeIn 0.1s forwards;
+  animation-delay: calc(var(--d) * 25ms);
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   WORKS PAGE
+======================================== */
+#works-page {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  background-color: #000;
+  pointer-events: none;
+}
+
+#works-page.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.works-content {
+  padding: 20vh 10px 10px 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.works-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.works-row.is-visible {
+  opacity: 1;
+}
+
+.works-row.is-visible .work-item {
+  transform: translateX(0);
+}
+
+.work-item {
+  aspect-ratio: 3 / 5;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #000;
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(100vw);
+  contain: layout style paint; /* CSS containment for better performance */
+}
+
+.work-item:nth-child(1) {
+  transition-delay: 0.1s;
+}
+
+.work-item:nth-child(2) {
+  transition-delay: 0.2s;
+}
+
+.work-item:nth-child(3) {
+  transition-delay: 0.3s;
+}
+
+.work-item:nth-child(4) {
+  transition-delay: 0.4s;
+}
+
+.work-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ========================================
+   OVERLAY & EFFECTS
+======================================== */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: black;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 2;
+}
+
+#overlay.fade-out {
+  background: white;
+  opacity: 0 !important;
+  transition: background-color 0.6s ease, opacity 6s ease;
+}
+
+#pixel-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+#effect-explosion {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  /* opacity: 0; */
+  transition: opacity 0.3s ease;
+   width: 40%;
+  transform: translate(5%, 130%);
+  height: 40%;
+}
+
+#effect-explosion-video {
+  width: 40%;
+  transform: translate(5%, 130%);
+  height: 40%;
+  object-fit: contain;
+}
+
+/* ========================================
+   VIDEO
+======================================== */
+#bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 1;
+  clip-path: circle(0% at 50% 50%);
+}
+
+/* ========================================
+   LOADING
+======================================== */
+#loading-wrapper {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  /* background: #000; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9;
+  transition: opacity 0.8s ease;
+}
+
+#lottie {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* #lottie svg {
+  background-color: #000 !important;
+} */
+
+#lottie,
+#lottieBg,
+#lottie-works {
+  position: absolute;
+  inset: 0;
+}
+
+#lottie-suwa {
+  position: absolute;
+}
+
+#lottie-suwa svg {
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+#lottie {
+  z-index: 1;
+}
+
+#lottieBg {
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#lottie-works {
+  z-index: 3;
+}
+
+#lottie-suwa {
+  z-index: 4;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+#main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  padding-top: 22px;
+  transform: translateY(-12px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+#main-header.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.sidebar {
+  flex-basis: 20%;
+  display: flex;
+  align-items: center;
+  padding-right: 22px;
+  justify-content: space-between;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  padding: 0;
+
+  font-family: "Neue Haas Grotesk Display Pro", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: -0.005em;
+
+  color: #ffffff;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+
+.nav-link:hover {
+  opacity: 0.7;
+}
+
+.logo {
+  padding-left: 22px;
+}
+
+.logo img {
+  width: 80%;
+}
+
+/* ========================================
+   CONTENT
+======================================== */
+.content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6%;
+  transform: translateY(120px);
+  opacity: 0;
+  padding: 22px;
+  transition: transform 1s ease-out, opacity 1s ease-out;
+}
+
+.content.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.title {
+  font-family: "Neue Haas Grotesk Display Pro", sans-serif;
+  font-weight: 700;
+  font-size: 79px;
+  line-height: 100%;
+  color: #ffffff;
+}
+
+.subText {
+  font-family: "Neue Haas Grotesk Display Pro", sans-serif;
+  font-weight: 700;
+  font-size: 34px;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* ========================================
+   MOBILE MENU
+======================================== */
+#mobile-overlay-blur {
+  background: rgba(0, 0, 0, 0.7);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 2;
+  display: none;
+}
+
+.mobile-menu,
+.mobile-menu-btn {
+  display: none;
+}
+
+/* ========================================
+   RESPONSIVE - TABLET
+======================================== */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    margin-top: 3%;
+  }
+
+  .title {
+    font-size: 44px !important;
+  }
+
+  .subText {
+    font-size: 23px !important;
+  }
+
+  .intro-logo {
+    margin-left: 10vw !important;
+  }
+}
+
+/* ========================================
+   RESPONSIVE - MOBILE
+======================================== */
+@media (max-width: 768px) {
+
+
+  .title {
+    font-size: 27px;
+  }
+
+  .subText {
+    font-size: 13px;
+  }
+
+  .content {
+    margin-top: -3%;
+  }
+
+  .logo img {
+    width: 80%;
+  }
+}
+
+@media (max-width: 1024px) {
+
+#effect-explosion{
+  width: 50% !important;
+  height: 25% !important;
+  transform: translate(0%, 130%);
+}
+
+  .sidebar {
+    display: none;
+  }
+
+  #lottieBg svg {
+    margin-bottom: 60px;
+    transform: scale(1.6) !important;
+  }
+
+  /* Mobile Menu Button */
+  .mobile-menu-btn {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    z-index: 20;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    opacity: 0;
+    cursor: pointer;
+    display: block;
+    transform: translateY(-12px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .mobile-menu-btn.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .mobile-menu-btn.active {
+    transform: rotate(180deg) scale(0.8);
+  }
+
+  /* Mobile Menu */
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .mobile-menu.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-menu .nav-link {
+    font-family: "Neue Haas Grotesk Display Pro", sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    transform: translateX(250px);
+    opacity: 0;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+  }
+
+  .mobile-menu.show .nav-link {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .mobile-menu.show .nav-link:nth-child(1) {
+    transition-delay: 0.1s;
+  }
+  .mobile-menu.show .nav-link:nth-child(2) {
+    transition-delay: 0.2s;
+  }
+  .mobile-menu.show .nav-link:nth-child(3) {
+    transition-delay: 0.3s;
+  }
+  .mobile-menu.show .nav-link:nth-child(4) {
+    transition-delay: 0.4s;
+  }
+
+  /* Video Animation */
+  #bg-video.move {
+    animation: panVideo 30s linear infinite; /* Reduced from 60s */
+  }
+
+  @keyframes panVideo {
+    0% {
+      object-position: 100% center;
+    }
+    100% {
+      object-position: 0% center;
+    }
+  }
+
+  /* Lottie adjustments */
+  #lottie-suwa {
+    top: 50%;
+  }
+
+  #lottie-suwa svg {
+    scale: 3;
+  }
+
+  #lottie-works svg {
+    scale: 1.8;
+  }
+
+  #effect-explosion-video {
+    transform: translate(5%, 80%);
+    /* display: none; */
+  }
+
+  /* Works grid - 2 columns */
+  .works-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .work-item {
+    height: 40vh;
+    aspect-ratio: auto;
+  }
+
+  .works-content {
+    gap: 4px;
+    padding: 10vh 10px 10px 10px !important;
+  }
+
+  /* Intro positioning */
+  .intro {
+    margin: 0;
+    top: unset;
+    left: unset;
+    bottom: 20px;
+  }
+
+  .intro-logo {
+    width: 90%;
+    margin-left: 4vw;
+    transform: translate(0, 60px);
+  }
+
+  .intro-logo.show {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  .typing-text {
+    display: none;
+  }
+
+  #lottie-suwa svg {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  #lottie {
+    transform: scale(0.6);
+  }
+
+  #lottie,
+  #lottie svg {
+    overflow: visible !important;
+  }
+}
+
+/* ========================================
+   LARGE SCREENS
+======================================== */
+@media (min-width: 1280px) {
+  .work-item {
+    min-height: 80vh;
+    aspect-ratio: auto;
+  }
+}
+
+/* ========================================
+   REDUCED MOTION
+======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
