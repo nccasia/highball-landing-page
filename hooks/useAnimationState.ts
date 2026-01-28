@@ -3,6 +3,7 @@ import { create } from 'zustand'
 interface AnimationState {
   isTransitioning: boolean
   showHeader: boolean
+  showBlurOverlay?: boolean
 
   targetPath: string | null
   setShowHeader: (v: boolean) => void
@@ -11,11 +12,13 @@ interface AnimationState {
   finishTransition: () => void
    hasPlayedIntro: boolean
   setHasPlayedIntro: () => void
+  setShowBlurOverlay: (v: boolean) => void
 }
 
 export const useAnimationState = create<AnimationState>((set) => ({
   isTransitioning: false,
   showHeader: false,
+  showBlurOverlay: false,
 
   targetPath: null,
 
@@ -33,4 +36,6 @@ export const useAnimationState = create<AnimationState>((set) => ({
     hasPlayedIntro: false,
 
   setHasPlayedIntro: () => set({ hasPlayedIntro: true }),
+
+  setShowBlurOverlay: (v: boolean) => set({ showBlurOverlay: v }),
 }))

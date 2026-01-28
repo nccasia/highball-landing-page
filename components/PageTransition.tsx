@@ -19,30 +19,29 @@ export default function PageTransition() {
 
   //   const { isLoadingComplete, isTransitioning, setTransitioning } = useAnimationState()
   const router = useRouter();
-  const { isTransitioning, targetPath, finishTransition } = useAnimationState();
+  const { isTransitioning, targetPath, finishTransition, setShowBlurOverlay } =
+    useAnimationState();
 
   useEffect(() => {
-    console.log('isTransitioning', isTransitioning, 'targetPath', targetPath , pathname);
-     if (targetPath === "/") {
+    if (targetPath === "/") {
       resetToHome();
     }
-    if (!isTransitioning || !targetPath || pathname=== "/works") return;
+    if (!isTransitioning || !targetPath || pathname === "/works") return;
 
     if (targetPath === "/works") {
       startWorksTransition();
     }
-
-   
   }, [isTransitioning, targetPath]);
 
   const startWorksTransition = () => {
     if (!worksLoadingRef.current) return;
-    const lottieBg = document.getElementById("lottieBg");
-    if (lottieBg) {
-      lottieBg.style.display = "none";
-    }
+    if (!overlayRef.current) return;
+    overlayRef.current.style.opacity = "1";
 
-    // setTransitioning(true)
+    setShowBlurOverlay(true);
+
+    worksLoadingRef.current.style.zIndex = "11";
+
     const isMobile = window.matchMedia("(max-width: 1024px)").matches;
 
     worksAnimRef.current = lottie.loadAnimation({
@@ -53,22 +52,44 @@ export default function PageTransition() {
       path: "animation/works-page-animation.json",
     });
 
-    if (!isMobile) {
-      worksAnimRef.current.addEventListener("DOMLoaded", () => {
-        const duration = worksAnimRef.current!.getDuration(true) * (1000 / 30);
-        runPixelEffect(duration);
-      });
-    }
-
     worksAnimRef.current.addEventListener("enterFrame", (e: any) => {
-      if (e.currentTime >= 30 && overlayRef.current) {
+      const currentTime = e.currentTime;
+      if (currentTime >= 30 && overlayRef.current) {
         overlayRef.current.style.opacity = "1";
+      }
+
+      const canvas = document.getElementById(
+        "pixel-canvas",
+      ) as HTMLCanvasElement;
+
+      const ZOOM_START = 13;
+      const ZOOM_END = 40;
+      const video = document.getElementById("bg-video") as HTMLVideoElement;
+      const overlay = document.getElementById("overlay") as HTMLVideoElement;
+      if (
+        currentTime >= ZOOM_START &&
+        currentTime <= ZOOM_END &&
+        canvas &&
+        video
+      ) {
+        canvas.style.opacity = "1";
+        video.style.opacity = "0";
+
+        renderPixelZoom(canvas, video, currentTime);
       }
     });
 
     worksAnimRef.current.addEventListener("complete", () => {
+      const lottieBg = document.getElementById("lottieBg");
+      if (lottieBg) {
+        lottieBg.style.display = "none";
+      }
       worksAnimRef.current?.destroy();
+      setShowBlurOverlay(false);
       startSuwa(isMobile);
+      if (worksLoadingRef.current) {
+        worksLoadingRef.current.style.zIndex = "3";
+      }
     });
   };
 
@@ -88,8 +109,8 @@ export default function PageTransition() {
     });
 
     suwaAnimRef.current.addEventListener("complete", () => {
-        playExplosion();
-        suwaAnimRef.current?.destroy();
+      playExplosion();
+      suwaAnimRef.current?.destroy();
     });
   };
 
@@ -110,6 +131,7 @@ export default function PageTransition() {
       if (e.currentTime >= 8) {
         overlayRef.current!.classList.add("fade-out");
       }
+
     });
 
     explosionAnimRef.current.addEventListener("complete", () => {
@@ -122,38 +144,7 @@ export default function PageTransition() {
     });
   };
 
-  const runPixelEffect = (duration: number) => {
-    const canvas = document.getElementById("pixel-canvas") as HTMLCanvasElement;
-    const video = document.getElementById("bg-video") as HTMLVideoElement;
-
-    if (!canvas || !video) return;
-
-    video.style.opacity = "0";
-    canvas.style.opacity = "1";
-    const start = performance.now();
-
-    function animate(now: number) {
-      const progress = Math.min((now - start) / duration, 1);
-      const pixelSize = Math.floor(10 + 90 * progress);
-
-      canvas.width = Math.floor(window.innerWidth / pixelSize);
-      canvas.height = Math.floor(window.innerHeight / pixelSize);
-
-      const ctx = canvas.getContext("2d");
-      if (ctx && video.readyState >= 2) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      }
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        video.style.opacity = "1";
-        canvas.style.opacity = "0";
-      }
-    }
-
-    requestAnimationFrame(animate);
-  };
+ 
 
   const resetToHome = () => {
     const lottieBg = document.getElementById("lottieBg");
@@ -173,11 +164,94 @@ export default function PageTransition() {
     video.style.display = "block";
     if (overlayRef.current) {
       overlayRef.current.style.opacity = "0";
+      overlayRef.current.style.clipPath = "circle(0% at 50% 50%) ";
       overlayRef.current.classList.remove("fade-out");
     }
 
     // setTransitioning(false)
   };
+
+  const pixelKeyframes = [
+
+    { frame: 13, pixel: 2, radius: 0.1 },
+    { frame: 14, pixel: 4, radius: 0.2 },
+    { frame: 15, pixel: 6, radius: 0.3 },
+    { frame: 16, pixel: 8, radius: 0.4 },
+    { frame: 17, pixel: 10, radius: 0.6 },
+    { frame: 18, pixel: 12, radius: 0.8 },
+    { frame: 19, pixel: 14, radius: 1.0 },
+    { frame: 20, pixel: 16, radius: 1.5 },
+    { frame: 21, pixel: 18, radius: 2.0 },
+    { frame: 22, pixel: 20, radius: 3.0 },
+    { frame: 23, pixel: 40, radius: 4.0 },
+    { frame: 24, pixel: 60, radius: 5.0 },
+    { frame: 25, pixel: 80, radius: 7.0 },
+    { frame: 26, pixel: 100, radius: 10.0 },
+    { frame: 27, pixel: 120, radius: 15.0 },
+    { frame: 28, pixel: 140, radius: 20.0 },
+    { frame: 29, pixel: 160, radius: 30.0 },
+    { frame: 30, pixel: 200, radius: 35.0 },
+    { frame: 31, pixel: 250, radius: 100 },
+    { frame: 32, pixel: 300, radius: 100 },
+    { frame: 33, pixel: 300, radius: 100 },
+    { frame: 34, pixel: 300, radius: 100 },
+    { frame: 35, pixel: 300, radius: 100 },
+    { frame: 36, pixel: 300, radius: 100 },
+    { frame: 37, pixel: 300, radius: 100 },
+    { frame: 38, pixel: 300, radius: 100 },
+    { frame: 39, pixel: 300, radius: 100 },
+    { frame: 40, pixel: 300, radius: 100 },
+  ];
+
+  function lerp(a: number, b: number, t: number) {
+    return a + (b - a) * t;
+  }
+
+  function interpolatePixel(frame: number) {
+    for (let i = 0; i < pixelKeyframes.length - 1; i++) {
+      const k1 = pixelKeyframes[i];
+      const k2 = pixelKeyframes[i + 1];
+
+      if (frame >= k1.frame && frame <= k2.frame) {
+        const t = (frame - k1.frame) / (k2.frame - k1.frame);
+        return {
+          pixel: lerp(k1.pixel, k2.pixel, t),
+          radius: lerp(k1.radius, k2.radius, t),
+        };
+      }
+    }
+
+    return pixelKeyframes[pixelKeyframes.length - 1];
+  }
+
+  function renderPixelZoom(
+    canvas: HTMLCanvasElement,
+    video: HTMLVideoElement,
+    frame: number,
+  ) {
+    const roundedFrame = Math.floor(frame);
+    const { pixel, radius } = interpolatePixel(roundedFrame);
+
+    const w = Math.floor(window.innerWidth / pixel);
+    const h = Math.floor(window.innerHeight / pixel);
+
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (ctx && video.readyState >= 2) {
+      ctx.drawImage(video, 0, 0, w, h);
+    }
+    const clipPath = `circle(${radius}% at 50% 50%)`;
+    if (overlayRef.current) overlayRef.current.style.clipPath = clipPath;
+    setTimeout(() => {
+      video.style.opacity = "1";
+      canvas.style.opacity = "0";
+    }, 1000);
+  }
+
 
   return (
     <>

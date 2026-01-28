@@ -10,7 +10,7 @@ export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
   // const [showButton, setShowButton] = useState(false)
   const pathname = usePathname()
-  const { startTransition, showHeader} = useAnimationState()
+  const { startTransition, showHeader, showBlurOverlay} = useAnimationState()
 
   useEffect(() => {
     // Show menu button after loading animation completes
@@ -51,13 +51,13 @@ export default function MobileMenu() {
 </nav>
 
       {/* Blur Overlay */}
-      {/* {isOpen && (
+      {showBlurOverlay && (
         <div 
           id="mobile-overlay-blur" 
           onClick={handleLinkClick}
           style={{ display: 'block' }}
         />
-      )} */}
+      )}
     </>
   )
 }
