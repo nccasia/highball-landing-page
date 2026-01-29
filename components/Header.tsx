@@ -1,14 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAnimationState } from '@/hooks/useAnimationState'
 import NavItem from './NavItem'
 
 export default function Header() {
-  const pathname = usePathname()
-  const { showHeader ,targetPath, startTransition} = useAnimationState()
+  const { showHeader , startTransition} = useAnimationState()
 
   return (
  <header id="main-header" className={showHeader ? 'show' : ''}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import lottie, { AnimationItem } from "lottie-web";
 import { useAnimationState } from "@/hooks/useAnimationState";
 import { usePathname } from "next/navigation";
@@ -31,7 +31,7 @@ export default function LoadingAnimation() {
       renderer: "svg",
       loop: false,
       autoplay: true,
-      path: "/animation/spinner-v2.json",
+      path: "/animation/spinner-v3.json",
       initialSegment: [0, 400],
       rendererSettings: {
         preserveAspectRatio: "xMidYMid slice",
@@ -40,35 +40,14 @@ export default function LoadingAnimation() {
 
     const onEnterFrame = (e: any) => {
       const currentTime = e.currentTime;
-
-      // Scale animation at frame 378
-      if (currentTime >= 378 && spinnerRef.current) {
-        spinnerRef.current.style.transform = "scale(1)";
-
-        // Show content using will-change for better performance
-        const content = document.querySelector(".content") as HTMLElement;
-        if (content) {
-          content.style.willChange = "opacity";
-          content.classList.add("show");
-          // Remove will-change after animation
-          setTimeout(() => {
-            content.style.willChange = "auto";
-          }, 500);
-        }
-
-        // Play logo animation (only once)
-      }
-
       if (currentTime >= 365) {
-        // alert('1')
-
         if (!logoAnimRef.current && logoLoadingRef.current) {
           logoAnimRef.current = lottie.loadAnimation({
             container: logoLoadingRef.current,
             renderer: "svg",
             loop: false,
             autoplay: true,
-            path: "animation/logo-v1.json",
+            path: "animation/logo-highballer.json",
           });
 
           logoAnimRef.current.addEventListener("complete", () => {
@@ -91,26 +70,6 @@ export default function LoadingAnimation() {
 
         renderPixelZoom(canvasRef.current, video, currentTime);
       }
-
-      // // Start pixel zoom at frame 358
-      // if (currentTime >= 358 && !hasRunPixelZoom.current) {
-      //   hasRunPixelZoom.current = true
-
-      //   if (loadingWrapperRef.current) {
-      //     loadingWrapperRef.current.style.background = 'transparent'
-      //   }
-
-      //   const isMobile = window.matchMedia('(max-width: 1024px)').matches
-      //   const video = document.getElementById('bg-video') as HTMLVideoElement
-
-      //   if (video && canvasRef.current) {
-      //     if (isMobile) {
-      //       runZoomMask(video, canvasRef.current)
-      //     } else {
-      //       // runPixelZoom(canvasRef.current, video)
-      //     }
-      //   }
-      // }
     };
 
     const onComplete = () => {
@@ -182,144 +141,7 @@ export default function LoadingAnimation() {
   );
 }
 
-// Pixel zoom effect for desktop - Optimized
-function runPixelZoom(canvas: HTMLCanvasElement, video: HTMLVideoElement) {
-  const duration = 1500;
-  const pixelFrom = 100;
-  const pixelTo = 2;
-  const radiusMid = 40;
-  const radiusTo = 130;
-  const start = performance.now();
-
-  // Pre-calculate values
-  const radiusDiff1 = radiusMid - 0.1;
-  const radiusDiff2 = radiusTo - radiusMid;
-  const pixelDiff = pixelTo - pixelFrom * 0.7;
-
-  video.style.opacity = "0";
-  canvas.style.opacity = "1";
-
-  // Use will-change for better performance
-  canvas.style.willChange = "clip-path";
-  video.style.willChange = "opacity, clip-path";
-
-  // Get context once
-  const ctx = canvas.getContext("2d", {
-    alpha: false,
-    desynchronized: true,
-    willReadFrequently: false,
-  });
-
-  let lastPixelSize = pixelFrom;
-  let rafId: number;
-
-  function animate(now: number) {
-    const t = Math.min((now - start) / duration, 1);
-    let radius: number;
-    let pixelSize: number;
-
-    if (t < 0.4) {
-      const p = t / 0.4;
-      const eased = p ** 4.5; // Faster than Math.pow
-      radius = 0.1 + radiusDiff1 * eased;
-      pixelSize = pixelFrom;
-    } else {
-      const p = (t - 0.4) / 0.6;
-      const eased = 1 - (1 - p) ** 3.5;
-      radius = radiusMid + radiusDiff2 * eased;
-      pixelSize = pixelFrom * 0.7 + pixelDiff * eased;
-    }
-
-    // Only resize canvas if pixel size changed significantly
-    if (Math.abs(pixelSize - lastPixelSize) > 0.5) {
-      canvas.width = Math.floor(window.innerWidth / pixelSize);
-      canvas.height = Math.floor(window.innerHeight / pixelSize);
-      lastPixelSize = pixelSize;
-    }
-
-    if (ctx && video.readyState >= 2) {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    }
-
-    const clipPath = `circle(${radius}% at 50% 50%)`;
-    canvas.style.clipPath = clipPath;
-    video.style.clipPath = clipPath;
-
-    if (t < 1) {
-      rafId = requestAnimationFrame(animate);
-    } else {
-      video.style.opacity = "1";
-      canvas.style.opacity = "0";
-
-      // Clean up will-change
-      canvas.style.willChange = "auto";
-      video.style.willChange = "auto";
-    }
-  }
-
-  rafId = requestAnimationFrame(animate);
-
-  // Return cleanup function
-  return () => {
-    if (rafId) cancelAnimationFrame(rafId);
-  };
-}
-
-// Zoom mask effect for mobile - Optimized
-function runZoomMask(
-  video: HTMLVideoElement,
-  canvas: HTMLCanvasElement | null,
-) {
-  const duration = 1500;
-  const radiusMid = 40;
-  const radiusTo = 130;
-  const start = performance.now();
-
-  if (canvas) {
-    canvas.style.display = "none";
-  }
-
-  // Pre-calculate values
-  const radiusDiff1 = radiusMid - 0.1;
-  const radiusDiff2 = radiusTo - radiusMid;
-
-  video.style.willChange = "opacity, clip-path";
-  let rafId: number;
-
-  function animate(now: number) {
-    const t = Math.min((now - start) / duration, 1);
-    let radius: number;
-
-    if (t < 0.4) {
-      const p = t / 0.4;
-      const eased = p ** 4.5;
-      radius = 0.1 + radiusDiff1 * eased;
-    } else {
-      const p = (t - 0.4) / 0.6;
-      const eased = 1 - (1 - p) ** 3.5;
-      radius = radiusMid + radiusDiff2 * eased;
-    }
-
-    video.style.clipPath = `circle(${radius}% at 50% 50%)`;
-
-    if (t < 1) {
-      rafId = requestAnimationFrame(animate);
-    } else {
-      video.style.opacity = "1";
-      video.style.willChange = "auto";
-    }
-  }
-
-  rafId = requestAnimationFrame(animate);
-
-  return () => {
-    if (rafId) cancelAnimationFrame(rafId);
-  };
-}
-
 const pixelKeyframes = [
-  // { frame: 355, pixel: 150, radius: 0.1 },
-  // { frame: 356, pixel: 150, radius: 0.1 },
   { frame: 357, pixel: 300, radius: 0.1 },
   { frame: 358, pixel: 300, radius: 0.2 },
   { frame: 359, pixel: 300, radius: 0.3 },

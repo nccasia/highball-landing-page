@@ -17,7 +17,6 @@ export default function PageTransition() {
   const suwaAnimRef = useRef<AnimationItem | null>(null);
   const explosionAnimRef = useRef<AnimationItem | null>(null);
 
-  //   const { isLoadingComplete, isTransitioning, setTransitioning } = useAnimationState()
   const router = useRouter();
   const { isTransitioning, targetPath, finishTransition, setShowBlurOverlay } =
     useAnimationState();
@@ -65,7 +64,6 @@ export default function PageTransition() {
       const ZOOM_START = 13;
       const ZOOM_END = 40;
       const video = document.getElementById("bg-video") as HTMLVideoElement;
-      const overlay = document.getElementById("overlay") as HTMLVideoElement;
       if (
         currentTime >= ZOOM_START &&
         currentTime <= ZOOM_END &&
@@ -131,7 +129,6 @@ export default function PageTransition() {
       if (e.currentTime >= 8) {
         overlayRef.current!.classList.add("fade-out");
       }
-
     });
 
     explosionAnimRef.current.addEventListener("complete", () => {
@@ -143,8 +140,6 @@ export default function PageTransition() {
       }, 1000);
     });
   };
-
- 
 
   const resetToHome = () => {
     const lottieBg = document.getElementById("lottieBg");
@@ -168,11 +163,9 @@ export default function PageTransition() {
       overlayRef.current.classList.remove("fade-out");
     }
 
-    // setTransitioning(false)
   };
 
   const pixelKeyframes = [
-
     { frame: 13, pixel: 2, radius: 0.1 },
     { frame: 14, pixel: 4, radius: 0.2 },
     { frame: 15, pixel: 6, radius: 0.3 },
@@ -251,7 +244,6 @@ export default function PageTransition() {
       canvas.style.opacity = "0";
     }, 1000);
   }
-
 
   return (
     <>
